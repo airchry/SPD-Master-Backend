@@ -18,7 +18,7 @@ const port = process.env.SERVER_PORT || 3000;
 
 app.use(cors({
   origin: isProduction
-    ? "https://spdmasterfront.vercel.app"
+    ? "http://spdmasterfront.vercel.app"
     : "http://localhost:5173", 
   credentials: true     
 }));
@@ -31,9 +31,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: isProduction,       // true only in production (HTTPS)
-    sameSite: isProduction ? "none" : "lax" // cross-site cookies
-  }
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  httpOnly: true
+}
 }));
 
 
