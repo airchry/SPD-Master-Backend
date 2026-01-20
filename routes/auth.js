@@ -31,27 +31,35 @@ router.get("/me", (req, res) => {
 
 passport.use(new LocalStrategy(
   async (username, password, cb) => {
+    console.log("Trying login for:", username);
+
     try {
       const { data: user, error } = await supabase
-      .from("logindata")
-      .select("username, password")
-      .eq("username", username)
-      .single();
+        .from("logindata")
+        .select("username, password")
+        .eq("username", username)
+        .single();
+
+      console.log("Supabase user:", user, "Error:", error);
 
       if (error || !user) {
         return cb(null, false, { message: 'Incorrect username.' });
       }
 
       if (password !== user.password) {
+        console.log("Password mismatch:", password, user.password);
         return cb(null, false, { message: 'Incorrect password.' });
       }
 
+      console.log("Login successful:", user);
       return cb(null, user);
     } catch (err) {
+      console.error("LocalStrategy error:", err);
       return cb(err);
     }
   }
 ));
+
 
 passport.serializeUser((user, done) => done(null, user.username));
 
