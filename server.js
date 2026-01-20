@@ -15,7 +15,9 @@ const app = express();
 const port = process.env.SERVER_PORT || 3000;
 
 app.use(cors({
-  origin: "https://spdmasterfront.vercel.app",
+  origin: [
+  "http://localhost:5173",
+  "https://spdmasterfront.vercel.app"],
   credentials: true,
 }));
 
