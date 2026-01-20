@@ -25,17 +25,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: 'keyboard cat',
+  secret: "keyboard-cat",
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 10,
-    httpOnly: true,
-  }
+  cookie: { secure: true }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 app.use("/api/forms", formRoutes);
 app.use("/api/lookup", lookUpRoutes);

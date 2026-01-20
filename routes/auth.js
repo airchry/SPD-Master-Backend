@@ -53,16 +53,21 @@ passport.use(new LocalStrategy(
   }
 ));
 
-passport.serializeUser(function(user, cb) {
-  process.nextTick(function() {
-    cb(null, user);
-  });
+passport.serializeUser((user, done) => done(null, user.username));
+
+passport.deserializeUser(async (username, done) => {
+  try {
+    const { data: user, error } = await supabase
+      .from("logindata")
+      .select("*")
+      .eq("username", username)
+      .single();
+    if (error) return done(error);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
 });
 
-passport.deserializeUser(function(user, cb) {
-  process.nextTick(function() {
-    return cb(null, user);
-  });
-});
 
 export default router;
