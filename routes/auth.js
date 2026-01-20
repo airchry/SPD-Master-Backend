@@ -7,12 +7,13 @@ const router = Router();
 
 router.post("/login", passport.authenticate("local"), (req, res) => {
   console.log("Login hit!");
-
+  console.log("req.user:", req.user);
   res.json({
     success: true,
-    user: req.user,
+    user: req.user
   });
 });
+
 
 router.post('/logout', function(req, res, next) {
   req.logout(function(err) {
@@ -59,7 +60,6 @@ passport.use(new LocalStrategy(
     }
   }
 ));
-
 
 passport.serializeUser((user, done) => done(null, user.username));
 

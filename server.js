@@ -11,24 +11,28 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const app = express();
 const port = process.env.SERVER_PORT || 3000;
 
 app.use(cors({
-  origin: "https://spdmasterfront.vercel.app",
-  credentials: true,
+  origin: isProduction
+    ? "https://spdmasterfront.vercel.app"
+    : "http://localhost:5173", 
+  credentials: true     
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: "some-secret-key",
+  secret: "goyobot",
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,
-    sameSite: "none"
+    secure: isProduction,       // true only in production (HTTPS)
+    sameSite: isProduction ? "none" : "lax" // cross-site cookies
   }
 }));
 
