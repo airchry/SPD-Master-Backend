@@ -22,7 +22,6 @@ async function Save(req, res) {
   }
 
   try {
-    // 1️⃣ Get next nomor_spd safely
     const { data: nomorSpd, error } = await supabase.rpc(
       "get_next_nomor_spd",
       {
@@ -33,7 +32,6 @@ async function Save(req, res) {
 
     if (error) throw error;
 
-    // 2️⃣ Insert SPD
     const { error: insertError } = await supabase
       .from("spd")
       .insert({
