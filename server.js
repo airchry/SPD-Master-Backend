@@ -18,7 +18,7 @@ const port = process.env.SERVER_PORT || 3000;
 
 app.use(cors({
   origin: isProduction
-    ? "http://spdmasterfront.vercel.app"
+    ? "https://spdmasterfront.vercel.app"
     : "http://localhost:5173", 
   credentials: true     
 }));
