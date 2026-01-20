@@ -15,9 +15,7 @@ const app = express();
 const port = process.env.SERVER_PORT || 3000;
 
 app.use(cors({
-  origin: [
-  "http://localhost:5173",
-  "https://spdmasterfront.vercel.app"],
+  origin: "https://spdmasterfront.vercel.app",
   credentials: true,
 }));
 
@@ -25,11 +23,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: "keyboard-cat",
+  secret: "some-secret-key",
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: true }
+  cookie: {
+    secure: true,
+    sameSite: "none"
+  }
 }));
+
 
 app.use(passport.initialize());
 app.use(passport.session());
