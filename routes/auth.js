@@ -8,6 +8,7 @@ const router = Router();
 router.post("/login", passport.authenticate("local"), (req, res) => {
   console.log("Login hit!");
   console.log("req.user:", req.user);
+  console.log("Session ID:", req.sessionID);
   res.json({
     success: true,
     user: req.user
