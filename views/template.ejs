@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @media print {
+        .header {
+            display: table;
+            width: 100%;
+        }
+        }
+
+        @page {
+        size: A4;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+        }
+
+        h1 {
+            font-size: 12px;
+            text-align: center;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 3px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+        }
+
+        .page {
+            page-break-after: auto;
+            padding-top: 2px;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        .kop-surat {
+            text-align: center;
+            margin: 0 200px 0 0;
+            font-weight: bold;
+            line-height: 1.5;
+            
+        }
+
+        .key-surat {
+            margin: 0 10px 0 0;
+        }
+
+        table {
+            width: 100%;
+            margin: 0 auto;
+            border: 2px solid black;
+        }
+
+        table, td {
+            border-collapse: collapse;
+        }
+
+        tr, td {
+            page-break-inside: avoid;
+        }
+
+        td {
+            width: 50%;
+            vertical-align: top;
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        .lasttd {
+            padding-bottom: 10px;
+        }
+
+        .cell-long {
+            text-align: justify;
+            line-height: 1.4;
+        }
+
+        .ppk {
+            display: flex;
+        }
+
+        .signature {
+            padding-top: 120px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page">
+
+        <div class="header">
+            <div class="kop-surat">
+                <p>KEMENTERIAN KEUANGAN REPUBLIK INDONESIA<br>
+                DIREKTORAT JENDERAL PAJAK<br>
+                KANWIL DJP JAKARTA BARAT<br>
+                KPP PRATAMA JAKARTA TAMANSARI</p>
+            </div>
+
+            <div class="key-surat">
+                <p>Lembar Ke</p>
+                <p>Kode No.</p>
+                <p>Nomor</p>
+            </div>
+
+            <div class="value-surat">
+                <p>: ......................................................................</p>
+                <p>: ......................................................................</p>
+                <p>: ......................................................................</p>
+            </div>
+        </div>
+
+        <h1>SURAT PERJALANAN DINAS (SPD)</h1>
+
+        <!------------------------------FIRST PAGE--------------------------------------->
+
+        <table class="first page">
+            <tr>
+                <td style="border: none" class="row1">1. Pejabat Pembuat Komitmen</td>
+                <td style="border-bottom: none" class="row1"><%= spdFormatted.nama_ppk %></td>
+            </tr>
+            <tr>
+                <td style="border: none" class="row1">2. Nama/NIP pegawai yang diperintahkan</td>
+                <td style="border-top: none" class="row1 lasttd"><%= spdFormatted.nama %></td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td style="border-bottom: none">3. a. Pangkat dan golongan ruang gaji menurut PP No. 10 Tahun 2008</td>
+                <td style="border-bottom: none">a. <%= spdFormatted.pangkat %></td>
+            </tr>
+            <tr style="border: none;">
+                <td style="border: none"><span style="color: white">3. </span>b. Jabatan</td>
+                <td style="border-bottom: none; border-top: none">b. <%= spdFormatted.jabatan %></td>
+            </tr>
+            <tr>
+                <td style="border: none"><span style="color: white">3. </span>c. Gaji pokok</td>
+                <td style="border-bottom: none; border-top: none">c.</td>
+            </tr>
+            <tr>
+                <td style="border: none"><span style="color: white">3. </span>d. Tingkat menurut peraturan perjalanan dinas</td>
+                <td style="border-top: none" class="lasttd">d.</td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>4. Maksud perjalanan dinas</td>
+                <td style="padding-bottom: 140px" class="cell-long lasttd"><%= spdFormatted.nama_kegiatan %></td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>5. Alat angkutan yang dipergunakan</td>
+                <td class="lasttd"><%= spdFormatted.nama_angkutan %></td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td style="border: none">6. a. Tempat berangkat</td>
+                <td style="border-bottom: none">a. <%= spdFormatted.tempat_berangkat %></td>
+            </tr>
+            <tr>    
+                <td style="border: none"><span style="color: white">6. </span>b. Tempat tujuan</td>
+                <td style="border-top: none" class="lasttd">b. <%= spdFormatted.tempat_tujuan %></td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+            <tr>
+                <td style="border-bottom: none">7. a. Lamanya perjalanan dinas</td>
+                <td style="border-bottom: none">a. <%= spdFormatted.lama_perjalanan %></td>
+            </tr>
+            <tr>
+                <td style="border: none"><span style="color: white">7. </span>b. Tanggal berangkat</td>
+                <td style="border-bottom: none; border-top: none">b. <%= spdFormatted.tanggal_berangkat %></td>
+            </tr>
+            <tr>
+                <td style="border: none"><span style="color: white">7. </span>c. Tanggal harus kembali</td>
+                <td style="border-bottom: none; border-top: none" class="lasttd">c. <%= spdFormatted.tanggal_kembali %></td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td style="border-bottom: none">Pengikut <span style="padding-left: 200px;">Nama</span>
+                <td style="border-bottom: none">Umur <span style="padding-left: 200px;">Hubungan Keluarga/Keterangan</span></td>
+            </tr>
+            <tr>
+                <td style="border-bottom: none; border-top: none">1. </span>
+            </tr>
+            <tr>
+                <td style="border-bottom: none; border-top: none">2. </span>
+            </tr>
+            <tr>
+                <td style="border-bottom: none; border-top: none" class="cell-long">3. </span>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td style="border-bottom: none">9. Pembebanan anggaran</td>
+                <td style="border-bottom: none"></td>
+            </tr>
+            <tr>
+                <td style="border-bottom: none; border-top: none"><span style="color: white">9. </span>a. Instansi</td>
+                <td style="border-bottom: none; border-top: none">a. KPP Pratama Jakarta Tamansari</td>
+            </tr>
+            <tr>
+                <td style="border-bottom: none; border-top: none"><span style="color: white">9. </span>b. Mata anggaran</td>
+                <td style="border-bottom: none; border-top: none" class="lasttd">b. 5421</td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>10. Keterangan lain-lain</td>
+                <td class="lasttd"></td>
+            </tr>
+        
+        </table>
+        <!-------------------------------------------------------------------------------->
+
+        <table style="border: none">
+            <tr>
+                <td style="border: none;">*) Coret yang tidak perlu</td>
+                <td style="border: none;" class="lasttd">
+                    <table style="width: 100%; border-top: none; border-right: none; border-left: none; border-bottom: 1px solid black; text-align: left; table-layout: fixed;">
+                        <tr>
+                            <td style="border: none; width: 10%;">Dikeluarkan di</td>
+                            <td style="border: none">: Jakarta</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none;">Pada Tanggal</td>
+                            <td style="border: none">: <%= new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) %></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+        </table>
+        <!-------------------------------------------------------------------------------->
+
+        <table style="border: none; text-align: center;">
+            <tr>
+                <td style="border: none;"></td>
+                <td style="border: none;">a.n. Pejabat yang Berwenang Memberi Perintah<br>Pejabat Pembuat Komitmen<div>
+                    <div class="signature"><span style="opacity: 30%;">Ditandatangani secara elektronik</span><br><span style="text-decoration: underline; font-weight: bold;"><%= spdFormatted.nama_ppk %></span><br><span style="font-weight: bold;">NIP <%= spdFormatted.nip_ppk %></span></div></td>
+            </tr>
+
+        </table>
+        
+    </div>
+    <!-------------------------------------------------------------------------------->
+
+    <div class="page-break"></div>
+
+    <div class="page">
+    <!------------------------------SECOND PAGE--------------------------------------->
+        <div style="height: 2px;"></div>
+        <table class="second-page">
+            <tr>
+                <td></td>
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="border: none; width: 20%;">Berangkat dari</td>
+                            <td style="border: none;">: <%= spdFormatted.tempat_berangkat %></td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Pada tanggal</td>
+                            <td style="border: none;">: <%= spdFormatted.tanggal_berangkat %></td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Ke</td>
+                            <td style="border: none;">: <%= spdFormatted.tanggal_kembali %></td>
+                        </tr>   
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <tr>
+                            <td style="border: none;">Kantor Pelayanan Pajak Pratama<br>Jakarta Tamansari<div><div class="signature"><span style="opacity: 30%;">Ditandatangani secara elektronik</span><br><span style="text-decoration: underline; font-weight: bold;"><%= spdFormatted.nama_kepala %></span><br><span style="font-weight: bold;">NIP <%= spdFormatted.nip_kepala %></span></div></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="width: 5%; border: none;">II.</td>
+                            <td style="border: none; width: 20%;">Tiba di</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">II.</td>
+                            <td style="border: none; width: 20%;">Pada tanggal</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">II.</td>
+                            <td style="border: none; width: 20%;">Kepala</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">II.</td>
+                            <td style="border: none; width: 20%; color: white;">Kepala</td>
+                            <td style="border: none; color: white">:</td>
+                        </tr> 
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <td style="border: none;"><div class="signature">(.........................................................)</div></td>
+                    </table>
+                </td>
+
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="border: none; width: 20%;">Berangkat dari</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Ke</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Pada tanggal</td>
+                            <td style="border: none;">:</td>
+                        </tr>  
+                        <tr>
+                            <td style="border: none; width: 20%;">Kepala</td>
+                            <td style="border: none;">:</td>
+                        </tr>   
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <td style="border: none;"><div class="signature">(.........................................................)</div></td>
+                    </table>
+                </td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="width: 5%; border: none;">III.</td>
+                            <td style="border: none; width: 20%;">Tiba di</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">III.</td>
+                            <td style="border: none; width: 20%;">Pada tanggal</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">III.</td>
+                            <td style="border: none; width: 20%;">Kepala</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">II.</td>
+                            <td style="border: none; width: 20%; color: white;">Kepala</td>
+                            <td style="border: none; color: white">:</td>
+                        </tr> 
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <td style="border: none;"><div class="signature">(.........................................................)</div></td>
+                    </table>
+                </td>
+
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="border: none; width: 20%;">Berangkat dari</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Ke</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Pada tanggal</td>
+                            <td style="border: none;">:</td>
+                        </tr>  
+                        <tr>
+                            <td style="border: none; width: 20%;">Kepala</td>
+                            <td style="border: none;">:</td>
+                        </tr>   
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <td style="border: none;"><div class="signature">(.........................................................)</div></td>
+                    </table>
+                </td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="width: 5%; border: none;">IV.</td>
+                            <td style="border: none; width: 20%;">Tiba di</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">IV.</td>
+                            <td style="border: none; width: 20%;">Pada tanggal</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">IV.</td>
+                            <td style="border: none; width: 20%;">Kepala</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">II.</td>
+                            <td style="border: none; width: 20%; color: white;">Kepala</td>
+                            <td style="border: none; color: white">:</td>
+                        </tr> 
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <td style="border: none;"><div class="signature">(.........................................................)</div></td>
+                    </table>
+                </td>
+
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="border: none; width: 20%;">Berangkat dari</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Ke</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="border: none; width: 20%;">Pada tanggal</td>
+                            <td style="border: none;">:</td>
+                        </tr>  
+                        <tr>
+                            <td style="border: none; width: 20%;">Kepala</td>
+                            <td style="border: none;">:</td>
+                        </tr>   
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <td style="border: none;"><div class="signature">(.........................................................)</div></td>
+                    </table>
+                </td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="width: 5%; border: none;">V.</td>
+                            <td style="border: none; width: 20%;">Tiba di</td>
+                            <td style="border: none;">:</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 5%; border: none; color: white">III.</td>
+                            <td style="border: none; width: 20%;">(tempat kedudukan)</td>
+                        </tr>
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <tr>
+                            <td style="border: none;">a.n. Pejabat yang Berwenang Memberi Perintah<br>Pejabat Pembuat Komitmen<div><div class="signature"><span style="opacity: 30%;">Ditandatangani secara elektronik</span><br><span style="text-decoration: underline; font-weight: bold;"><%= spdFormatted.nama_ppk %></span><br><span style="font-weight: bold;">NIP <%= spdFormatted.nip_ppk %></span></div></td>
+                        </tr>
+                    </table>
+                </td>
+
+                <td>
+                    <table style="width: 100%; table-layout: fixed; border: none;">
+                        <tr>
+                            <td style="border: none; width: 20%; text-align: justify; border-bottom: 2px solid black;">Telah diperiksa, dengan keterangan bahwa perjalanan tersebut diatas benar dilakukan atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya</td>
+                        </tr>
+                    </table>
+                    <table style="width: 100%; table-layout: fixed; border: none; text-align: center;">
+                        <td style="border: none;">a.n. Pejabat yang Berwenang Memberi Perintah<br>Pejabat Pembuat Komitmen<div><div class="signature"><span style="opacity: 30%;">Ditandatangani secara elektronik</span><br><span style="text-decoration: underline; font-weight: bold;"><%= spdFormatted.nama_ppk %></span><br><span style="font-weight: bold;">NIP <%= spdFormatted.nip_ppk %></span></div></td>
+                    </table>
+                </td>
+            </tr>
+            <!-------------------------------------------------------------------------------->
+
+            <tr>
+                <td>VI. CATATAN-CATATAN LAIN</td>
+            </tr>
+
+            
+        </table>
+
+        <!-------------------------------------------------------------------------------->
+        <table style="border: none;">
+            <tr>
+                <td style="border: none;">VII. PERHATIAN</td>
+            </tr>
+            <tr>
+                <td style="border: none; text-align: justify;">
+                    Pejabat yang berwenang menerbitkan SPPD, pegawai yang melakukan perjalanan dinas, para pejabat yang mengesahkan tanggal berangkat/tibaserta bendaharawan bertanggung jawab berdasarkan peraturan-peraturan Keuangan Negara apabila menderita rugi akibat kesalahan, kelalaian dan kealpaannya.
+                </td>
+            </tr>
+        </table>
+        
+    </div>
+    
+    
+</body>
+</html>
