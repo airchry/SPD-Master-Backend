@@ -39,8 +39,8 @@ async function Save(req, res) {
 
     const nomorSpd = (lastSPD?.[0]?.nomor_spd ?? 0) + 1;
 
-    // 3️⃣ Insert into SPD table
-    const { error: insertError } = await supabase
+    // 3️⃣ Insert into SPD table including created_at
+    const { data: insertedData, error: insertError } = await supabase
       .from("spd")
       .insert({
         user_id: userId,
@@ -57,8 +57,10 @@ async function Save(req, res) {
         nama_kepala: namaKepala,
         nip_kepala: nipKepala,
         kode_kantor,
-        tahun
-      });
+        tahun,
+        created_at: new Date().toISOString() // explicitly include created_at
+      })
+      .select(); // returns the inserted row including created_at
 
     if (insertError) {
       console.error("Error inserting SPD:", insertError);
@@ -66,9 +68,11 @@ async function Save(req, res) {
     }
 
     // 4️⃣ Success response
+    const createdRow = insertedData[0];
     return res.json({
       message: "SPD berhasil dibuat",
-      nomorSPD: `SPD-${nomorSpd}/${kode_kantor}/${tahun}`
+      nomorSPD: `SPD-${nomorSpd}/${kode_kantor}/${tahun}`,
+      createdAt: createdRow.created_at
     });
 
   } catch (err) {
