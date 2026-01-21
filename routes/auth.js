@@ -5,14 +5,31 @@ import supabase from "../supabase.js";
 
 const router = Router();
 
-router.post("/login", passport.authenticate("local"), (req, res) => {
-  console.log("Login hit!");
-  console.log("req.user:", req.user);
-  console.log("Session ID:", req.sessionID);
-  res.json({
-    success: true,
-    user: req.user
-  });
+router.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      console.error("Passport error:", err);
+      return res.status(500).json({ message: "Server error" });
+    }
+
+    if (!user) {
+      return res.status(401).json({
+        message: info?.message || "Login failed",
+      });
+    }
+
+    req.login(user, (err) => {
+      if (err) {
+        console.error("req.login error:", err);
+        return res.status(500).json({ message: "Login error" });
+      }
+
+      res.json({
+        success: true,
+        user,
+      });
+    });
+  })(req, res, next);
 });
 
 

@@ -11,10 +11,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const isProduction = process.env.NODE_ENV === "production";
-
 const app = express();
 const port = process.env.SERVER_PORT || 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.set("trust proxy", 1);
+
 
 app.use(cors({
   origin: [
@@ -24,20 +28,15 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.set("trust proxy", 1);
-
 app.use(session({
-  name: "connect.sid",
+  name: "keyboard-cat",
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true,       // REQUIRED on Railway
-    sameSite: "none",   // REQUIRED for cross-site cookies
+    secure: true,
+    sameSite: "none",
   },
 }));
 
