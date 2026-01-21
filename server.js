@@ -17,24 +17,28 @@ const app = express();
 const port = process.env.SERVER_PORT || 3000;
 
 app.use(cors({
-  origin: isProduction
-    ? "https://spdmasterfront.vercel.app"
-    : "http://localhost:5173", 
-  credentials: true     
+  origin: [
+    "http://localhost:5173",
+    "https://https://spdmasterfront.vercel.app/"
+  ],
+  credentials: true,
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.set("trust proxy", 1);
+
 app.use(session({
-  secret: "goyobot",
+  name: "connect.sid",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax",
-  httpOnly: true
-}
+    httpOnly: true,
+    secure: true,       // REQUIRED on Railway
+    sameSite: "none",   // REQUIRED for cross-site cookies
+  },
 }));
 
 
