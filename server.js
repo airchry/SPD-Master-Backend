@@ -45,7 +45,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/forms", formRoutes);
+app.use("/api", formRoutes);
 app.use("/api/lookup", lookUpRoutes);
 app.use("/api/listspd", listSpd);
 app.use("/api", auth);
