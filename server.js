@@ -19,14 +19,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("trust proxy", 1);
 
-
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://spdmasterfront.vercel.app/"
+    "https://spdmasterfront.vercel.app"
   ],
   credentials: true,
 }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
   name: "keyboard-cat",
@@ -40,16 +42,19 @@ app.use(session({
   },
 }));
 
-
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 app.use("/api/forms", formRoutes);
 app.use("/api/lookup", lookUpRoutes);
 app.use("/api/listspd", listSpd);
 app.use("/api", auth);
 app.use("/api", generatepdf);
+
+app.use((err, req, res, next) => {
+  console.error("🔥 ERROR:", err);
+  res.status(500).json({ message: err.message });
+});
 
 app.listen(port, () => {
   console.log(`Listening to port ${port}.`);
