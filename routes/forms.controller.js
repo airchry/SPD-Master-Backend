@@ -1,5 +1,9 @@
 import supabase from "../supabase.js";
 
+/**
+ * Save SPD safely without a missing RPC.
+ * Automatically calculates next nomor_spd per kantor & tahun.
+ */
 async function Save(req, res) {
   try {
     const {
@@ -18,38 +22,28 @@ async function Save(req, res) {
     const kode_kantor = "KPP.0503";
     const tahun = new Date().getFullYear();
 
-    // 1️⃣ Validasi dasar
+    // 1️⃣ Basic validation
     if (!userId) {
       return res.status(400).json({ error: "Pegawai tidak ada" });
     }
 
-    // 2️⃣ Ambil nomor SPD berikutnya (SAMA seperti kode pool.query lama)
-    const { data, error } = await supabase.rpc("get_next_nomor_spd", {
-      p_kode_kantor: kode_kantor,
-      p_tahun: tahun
-    });
+    // 2️⃣ Get the next SPD number safely
+    const { data: lastSPD, error: lastError } = await supabase
+      .from("spd")
+      .select("nomor_spd")
+      .eq("kode_kantor", kode_kantor)
+      .eq("tahun", tahun)
+      .order("nomor_spd", { ascending: false })
+      .limit(1);
 
-    if (error) {
-      console.error("RPC ERROR:", error);
-      return res.status(500).json({ error: "Gagal mengambil nomor SPD" });
+    if (lastError) {
+      console.error("Error fetching last SPD:", lastError);
+      return res.status(500).json({ error: "Gagal menghitung nomor SPD" });
     }
 
-    /**
-     * IMPORTANT:
-     * rpc Supabase biasanya return ARRAY
-     * Contoh:
-     * data = [{ get_next_nomor_spd: 5 }]
-     */
-    const nomorSpd =
-      Array.isArray(data)
-        ? data[0]?.get_next_nomor_spd ?? data[0]?.next_nomor
-        : data;
+    const nomorSpd = (lastSPD?.[0]?.nomor_spd ?? 0) + 1;
 
-    if (!nomorSpd) {
-      return res.status(500).json({ error: "Nomor SPD tidak valid" });
-    }
-
-    // 3️⃣ Insert ke tabel spd
+    // 3️⃣ Insert new SPD
     const { error: insertError } = await supabase
       .from("spd")
       .insert({
@@ -69,11 +63,11 @@ async function Save(req, res) {
       });
 
     if (insertError) {
-      console.error("INSERT ERROR:", insertError);
+      console.error("Error inserting SPD:", insertError);
       return res.status(500).json({ error: "Gagal menyimpan SPD" });
     }
 
-    // 4️⃣ Response sukses
+    // 4️⃣ Respond success
     return res.json({
       message: "SPD berhasil dibuat",
       nomorSPD: `SPD-${nomorSpd}/${kode_kantor}/${tahun}`
