@@ -114,47 +114,51 @@ router.get("/filterspd", async (req, res) => {
 
   try {
     if (!namaPeg) {
-      return res.status(400).json({ value: "" });
+      return res.status(400).json([]);
     }
 
+    // 1. Cari pegawai dulu
+    const { data: pegawai, error: pegError } = await supabase
+      .from("pegawai")
+      .select("id, nama, nip")
+      .ilike("nama", `%${namaPeg}%`)
+      .limit(1)
+      .single();
+
+    if (pegError || !pegawai) {
+      return res.json([]);
+    }
+
+    // 2. Ambil SPD berdasarkan pegawai_id
     const { data, error } = await supabase
       .from("spd")
       .select(`
         nomor_spd,
         nama_kegiatan,
         tanggal_berangkat,
-        tanggal_kembali,
-        pegawai (
-          id,
-          nama,
-          nip
-        )
+        tanggal_kembali
       `)
-      .ilike("pegawai.nama", `%${namaPeg}%`)
+      .eq("pegawai_id", pegawai.id)
       .order("tanggal_berangkat", { ascending: false });
 
     if (error) throw error;
 
-    if (!data || data.length === 0) {
-      return res.json({ value: "" });
-    }
-
     const result = data.map(row => ({
-      id: row.pegawai.id,
-      nama: row.pegawai.nama,
-      nip: row.pegawai.nip,
       nomor_spd: row.nomor_spd,
+      nama: pegawai.nama,
+      nip: pegawai.nip,
       nama_kegiatan: row.nama_kegiatan,
       tanggal_berangkat: row.tanggal_berangkat,
       tanggal_kembali: row.tanggal_kembali,
     }));
 
-    return res.json(result);
+    res.json(result);
 
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: "Database error" });
   }
 });
+
 
 export default router;
