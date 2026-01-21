@@ -1,9 +1,5 @@
 import supabase from "../supabase.js";
 
-/**
- * Save SPD safely without a missing RPC.
- * Automatically calculates next nomor_spd per kantor & tahun.
- */
 async function Save(req, res) {
   try {
     const {
@@ -16,18 +12,18 @@ async function Save(req, res) {
       tanggalBerangkat,
       tanggalKembali,
       namaPPK,
-      namaKepala
+      nipPPK,
+      namaKepala,
+      nipKepala
     } = req.body;
 
     const kode_kantor = "KPP.0503";
     const tahun = new Date().getFullYear();
 
     // 1️⃣ Basic validation
-    if (!userId) {
-      return res.status(400).json({ error: "Pegawai tidak ada" });
-    }
+    if (!userId) return res.status(400).json({ error: "Pegawai tidak ada" });
 
-    // 2️⃣ Get the next SPD number safely
+    // 2️⃣ Calculate next SPD number
     const { data: lastSPD, error: lastError } = await supabase
       .from("spd")
       .select("nomor_spd")
@@ -43,7 +39,7 @@ async function Save(req, res) {
 
     const nomorSpd = (lastSPD?.[0]?.nomor_spd ?? 0) + 1;
 
-    // 3️⃣ Insert new SPD
+    // 3️⃣ Insert into SPD table
     const { error: insertError } = await supabase
       .from("spd")
       .insert({
@@ -57,7 +53,9 @@ async function Save(req, res) {
         tanggal_berangkat: tanggalBerangkat,
         tanggal_kembali: tanggalKembali,
         nama_ppk: namaPPK,
+        nip_ppk: nipPPK,
         nama_kepala: namaKepala,
+        nip_kepala: nipKepala,
         kode_kantor,
         tahun
       });
@@ -67,7 +65,7 @@ async function Save(req, res) {
       return res.status(500).json({ error: "Gagal menyimpan SPD" });
     }
 
-    // 4️⃣ Respond success
+    // 4️⃣ Success response
     return res.json({
       message: "SPD berhasil dibuat",
       nomorSPD: `SPD-${nomorSpd}/${kode_kantor}/${tahun}`
@@ -75,9 +73,7 @@ async function Save(req, res) {
 
   } catch (err) {
     console.error("SAVE SPD ERROR:", err);
-    return res.status(500).json({
-      error: "Terjadi kesalahan saat menyimpan SPD"
-    });
+    return res.status(500).json({ error: "Terjadi kesalahan saat menyimpan SPD" });
   }
 }
 
