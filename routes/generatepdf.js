@@ -30,7 +30,7 @@ router.get("/spd/:id", async (req, res) => {
       .from("spd")
       .select("*")
       .eq("nomor_spd", id)
-      .maybeSingle();
+      .single();
 
     if (error || !spd) {
       console.error("SPD NOT FOUND:", error);
