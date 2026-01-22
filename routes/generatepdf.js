@@ -63,14 +63,17 @@ router.get("/spd/:id", async (req, res) => {
     };
 
     // 4️⃣ Render EJS
-    const html = await ejs.renderFile(
-      path.join(__dirname, "../views/template.ejs"),
+    const html = await ejs.renderFile(("../views/template.ejs"),
       { spd: spdFormatted }
     );
 
     // 5️⃣ Generate PDF
     const browser = await puppeteer.launch({
-      headless: "new"
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+      ],
     });
 
     const page = await browser.newPage();
