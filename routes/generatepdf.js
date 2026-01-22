@@ -103,9 +103,14 @@ router.get("/spd/:id", async (req, res) => {
     res.send(pdf);
 
   } catch (err) {
-    console.error("GENERATE PDF ERROR:", err);
-    res.sendStatus(500);
-  }
+  console.error("PDF ERROR:", err);
+  res.status(500).json({
+    message: "PDF generation failed",
+    error: err?.message || err,
+  });
+  console.log("EJS PATH:", path.join(__dirname, "../views/template.ejs"));
+}
+
 });
 
 export default router;
