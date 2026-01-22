@@ -1,73 +1,38 @@
 import path from "path";
 import puppeteer from "puppeteer";
 import { Router } from "express";
-import supabase from "../supabase.js";
+import pool from "../db/pool.js";
 import ejs from "ejs";
 import { fileURLToPath } from "url";
 
 const router = Router();
 
+// Fix __dirname for ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-function formatTanggal(dateString) {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
 
 router.get("/spd/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    // 1️⃣ Ambil data SPD (SAMA seperti pool.query lama)
-    const { data: spd, error } = await supabase
-      .from("spd")
-      .select("*")
-      .eq("nomor_spd", id)
-      .maybeSingle();
+    // 1️⃣ Get SPD data
+    const result = await pool.query(
+      "SELECT * FROM spd WHERE nomor_spd = $1",
+      [id]
+    );
 
-    if (error || !spd) {
-      console.error("SPD NOT FOUND:", error);
+    const spd = result.rows[0];
+    if (!spd) {
       return res.sendStatus(404);
     }
 
-    // 2️⃣ Ambil data pegawai (query TERPISAH)
-    let pegawai = null;
-
-    if (spd.user_id) {
-      const { data, error } = await supabase
-        .from("pegawai")
-        .select("nip, nama, pangkat, jabatan")
-        .eq("id", spd.user_id)
-        .maybeSingle();
-
-      if (!error) {
-        pegawai = data;
-      }
-    }
-
-    // 3️⃣ Gabungkan & format (AMAN)
-    const spdFormatted = {
-      ...spd,
-      nip_pegawai: pegawai?.nip ?? "",
-      nama: pegawai?.nama ?? "",
-      pangkat: pegawai?.pangkat ?? "",
-      jabatan: pegawai?.jabatan ?? "",
-      tanggal_berangkat: formatTanggal(spd.tanggal_berangkat),
-      tanggal_kembali: formatTanggal(spd.tanggal_kembali),
-    };
-
-    // 4️⃣ Render EJS
-    const html = await ejs.renderFile(("../views/template.ejs"),
-      { spd: spdFormatted }
+    // 2️⃣ Render EJS to HTML
+    const html = await ejs.renderFile(
+      path.join(__dirname, "../views/template.ejs"),
+      { spd } // always pass object
     );
 
-    // 5️⃣ Generate PDF
+    // 3️⃣ Launch Puppeteer (Railway safe)
     const browser = await puppeteer.launch({
       headless: "new",
       args: [
@@ -79,10 +44,10 @@ router.get("/spd/:id", async (req, res) => {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
 
+    // 4️⃣ Generate PDF
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      scale: 0.8,
       margin: {
         top: "6mm",
         bottom: "6mm",
@@ -93,7 +58,7 @@ router.get("/spd/:id", async (req, res) => {
 
     await browser.close();
 
-    // 6️⃣ Kirim PDF
+    // 5️⃣ Send PDF
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
