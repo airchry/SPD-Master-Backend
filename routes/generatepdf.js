@@ -77,7 +77,7 @@ router.get("/spd/:id", async (req, res) => {
     });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(html);
 
     // 6️⃣ Generate PDF
     const pdf = await page.pdf({
