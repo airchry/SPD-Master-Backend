@@ -65,7 +65,7 @@ router.get("/spd/:id", async (req, res) => {
     // 4️⃣ Render EJS
     const html = await ejs.renderFile(
       path.join(__dirname, "../views/template.ejs"),
-      { spd: spdFormatted }
+      { spdFormatted }
     );
 
     // 5️⃣ Launch Puppeteer (Railway SAFE)
@@ -104,12 +104,7 @@ router.get("/spd/:id", async (req, res) => {
 
   } catch (err) {
   console.error("PDF ERROR:", err);
-  res.status(500).json({
-    message: "PDF generation failed",
-    error: err?.message || err,
-  });
-  console.log("EJS PATH:", path.join(__dirname, "../views/template.ejs"));
-}
+  }
 
 });
 
