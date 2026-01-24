@@ -77,7 +77,11 @@ router.get("/spd/:id", async (req, res) => {
     });
 
     const page = await browser.newPage();
-    await page.setContent(html);
+    page.setDefaultTimeout(30000);
+    page.setDefaultNavigationTimeout(30000);
+
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
 
     // 6️⃣ Generate PDF
     const pdf = await page.pdf({
@@ -94,17 +98,19 @@ router.get("/spd/:id", async (req, res) => {
     await browser.close();
 
     // 7️⃣ Send PDF
-    res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
-      "Content-Disposition",
-      `attachment; filename=spd-${id}.pdf`
+    "Content-Disposition",
+    `inline; filename="spd-${id}.pdf"`
     );
+
 
     res.send(pdf);
 
   } catch (err) {
   console.error("PDF ERROR:", err);
+  res.status(500).json({ message: "Failed to generate PDF" });
   }
+
 
 });
 
