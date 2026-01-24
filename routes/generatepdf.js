@@ -23,10 +23,9 @@ function formatTanggal(dateString) {
 }
 
 router.get("/spd/:id", async (req, res) => {
-  const { id } = req.params;
-
   try {
-    // 1️⃣ Get SPD data
+    const { id } = req.params;
+
     const { data: spd, error } = await supabase
       .from("spd")
       .select("*")
@@ -34,84 +33,58 @@ router.get("/spd/:id", async (req, res) => {
       .single();
 
     if (error || !spd) {
-      console.error("SPD NOT FOUND:", error);
-      return res.sendStatus(404);
+      return res.status(404).json({ message: "SPD not found" });
     }
 
-    // 2️⃣ Get pegawai data (optional)
-    let pegawai = null;
-
-    if (spd.user_id) {
-      const { data } = await supabase
-        .from("pegawai")
-        .select("nip, nama, pangkat, jabatan")
-        .eq("id", spd.user_id)
-        .maybeSingle();
-
-      pegawai = data;
+    let html;
+    try {
+      html = await ejs.renderFile(
+        path.join(__dirname, "../views/template.ejs"),
+        { spdFormatted: spd }
+      );
+    } catch (e) {
+      console.error("EJS ERROR:", e);
+      return res.status(500).json({ message: "EJS render failed" });
     }
 
-    // 3️⃣ Merge + format
-    const spdFormatted = {
-      ...spd,
-      nip_pegawai: pegawai?.nip ?? "",
-      nama: pegawai?.nama ?? "",
-      pangkat: pegawai?.pangkat ?? "",
-      jabatan: pegawai?.jabatan ?? "",
-      tanggal_berangkat: formatTanggal(spd.tanggal_berangkat),
-      tanggal_kembali: formatTanggal(spd.tanggal_kembali),
-    };
+    const executablePath =
+      (await chromium.executablePath()) || "/usr/bin/chromium-browser";
 
-    // 4️⃣ Render EJS
-    const html = await ejs.renderFile(
-      path.join(__dirname, "../views/template.ejs"),
-      { spdFormatted }
-    );
-
-    // 5️⃣ Launch Puppeteer (Railway SAFE)
     const browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      args: [
+        ...chromium.args,
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
+      executablePath,
+      headless: true,
+      ignoreHTTPSErrors: true,
     });
 
     const page = await browser.newPage();
-    page.setDefaultTimeout(30000);
-    page.setDefaultNavigationTimeout(30000);
-
     await page.setContent(html, { waitUntil: "networkidle0" });
 
-
-    // 6️⃣ Generate PDF
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
-      margin: {
-        top: "6mm",
-        bottom: "6mm",
-        left: "6mm",
-        right: "6mm",
-      },
     });
 
     await browser.close();
 
-    // 7️⃣ Send PDF
+    res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
-    "Content-Disposition",
-    `inline; filename="spd-${id}.pdf"`
+      "Content-Disposition",
+      `attachment; filename="spd-${id}.pdf"`
     );
 
-
-    res.send(pdf);
+    res.end(pdf);
 
   } catch (err) {
-  console.error("PDF ERROR:", err);
-  res.status(500).json({ message: "Failed to generate PDF" });
+    console.error("PDF ERROR:", err);
+    res.status(500).json({ message: "Failed to generate PDF" });
   }
-
-
 });
+
 
 export default router;
