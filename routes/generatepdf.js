@@ -81,9 +81,14 @@ router.get("/spd/:id", async (req, res) => {
     res.end(pdf);
 
   } catch (err) {
-    console.error("PDF ERROR:", err);
-    res.status(500).json({ message: "Failed to generate PDF" });
-  }
+  console.error("PDF ERROR FULL:", err);
+  res.status(500).json({
+    message: "Failed to generate PDF",
+    error: err.message,
+    stack: err.stack
+  });
+}
+
 });
 
 
