@@ -4,9 +4,7 @@ import PDFDocument from "pdfkit";
 
 const router = Router();
 
-/* ===============================
-   Helper: format tanggal Indonesia
-================================ */
+// Format tanggal Indonesia
 function formatTanggal(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -17,14 +15,11 @@ function formatTanggal(dateString) {
   });
 }
 
-/* ===============================
-   GET PDF SPD
-================================ */
 router.get("/spd/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    /* ===== 1️⃣ Ambil SPD ===== */
+    // 1️⃣ Ambil data SPD
     const { data: spd, error } = await supabase
       .from("spd")
       .select("*")
@@ -35,8 +30,9 @@ router.get("/spd/:id", async (req, res) => {
       return res.status(404).json({ message: "SPD not found" });
     }
 
-    /* ===== 2️⃣ Ambil Pegawai (optional) ===== */
+    // 2️⃣ Ambil data pegawai (jika ada)
     let pegawai = null;
+
     if (spd.user_id) {
       const { data } = await supabase
         .from("pegawai")
@@ -47,41 +43,37 @@ router.get("/spd/:id", async (req, res) => {
       pegawai = data;
     }
 
-    /* ===== 3️⃣ Bentuk spdFormatted ===== */
+    // 3️⃣ Bentuk spdFormatted
     const spdFormatted = {
       nomor_spd: spd.nomor_spd,
       nama: pegawai?.nama ?? "",
       nip: pegawai?.nip ?? "",
       pangkat: pegawai?.pangkat ?? "",
       jabatan: pegawai?.jabatan ?? "",
-      nama_kegiatan: spd.nama_kegiatan,
-      tempat_tujuan: spd.tempat_tujuan,
-      lama_perjalanan: spd.lama_perjalanan,
+      nama_kegiatan: spd.nama_kegiatan ?? "",
+      tempat_tujuan: spd.tempat_tujuan ?? "",
+      lama_perjalanan: spd.lama_perjalanan ?? "",
       tanggal_berangkat: formatTanggal(spd.tanggal_berangkat),
       tanggal_kembali: formatTanggal(spd.tanggal_kembali),
     };
 
-    /* ===== 4️⃣ Header Response ===== */
+    // 4️⃣ Set header PDF
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `attachment; filename="spd-${id}.pdf"`
     );
 
-    /* ===== 5️⃣ Generate PDF ===== */
+    // 5️⃣ Buat PDF
     const doc = new PDFDocument({ size: "A4", margin: 50 });
     doc.pipe(res);
 
     // ===== HEADER =====
-    doc
-      .fontSize(14)
-      .text("SURAT PERJALANAN DINAS", { align: "center" });
-    doc
-      .fontSize(10)
-      .text("PEMERINTAH KABUPATEN / KOTA XXXXX", { align: "center" });
+    doc.fontSize(14).text("SURAT PERJALANAN DINAS", { align: "center" });
+    doc.fontSize(12).text("PEMERINTAH DAERAH", { align: "center" });
     doc.moveDown(2);
 
-    // ===== DATA UTAMA =====
+    // ===== INFO UTAMA =====
     doc.fontSize(11);
     doc.text(`Nomor SPD       : ${spdFormatted.nomor_spd}`);
     doc.text(`Nama            : ${spdFormatted.nama}`);
@@ -89,7 +81,7 @@ router.get("/spd/:id", async (req, res) => {
     doc.text(`Pangkat/Jabatan : ${spdFormatted.pangkat} / ${spdFormatted.jabatan}`);
     doc.moveDown();
 
-    // ===== DATA PERJALANAN =====
+    // ===== RINCIAN PERJALANAN =====
     doc.text(`Kegiatan        : ${spdFormatted.nama_kegiatan}`);
     doc.text(`Tujuan          : ${spdFormatted.tempat_tujuan}`);
     doc.text(`Lama Perjalanan : ${spdFormatted.lama_perjalanan} hari`);
@@ -97,13 +89,15 @@ router.get("/spd/:id", async (req, res) => {
       `Tanggal         : ${spdFormatted.tanggal_berangkat} s.d ${spdFormatted.tanggal_kembali}`
     );
 
-    doc.moveDown(4);
+    doc.moveDown(3);
 
     // ===== TANDA TANGAN =====
-    doc.text("Pejabat Pembuat Komitmen,", { align: "right" });
+    doc.text("Mengetahui,", { align: "right" });
     doc.moveDown(4);
-    doc.text("( ____________________ )", { align: "right" });
+    doc.text("__________________________", { align: "right" });
+    doc.text("Pejabat Berwenang", { align: "right" });
 
+    // 6️⃣ Final PDF
     doc.end();
 
   } catch (err) {
