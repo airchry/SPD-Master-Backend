@@ -75,8 +75,9 @@ router.get("/spd/:id", async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="spd-${id}.pdf"`
+      `inline; filename="spd-${id}.pdf"`
     );
+
 
     res.end(pdf);
 
