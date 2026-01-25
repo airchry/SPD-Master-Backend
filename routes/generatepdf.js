@@ -25,29 +25,44 @@ router.get("/spd/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data: spd, error } = await supabase
+    const { data, error } = await supabase
       .from("spd")
-      .select("*")
+      .select(`
+        nomor_spd,
+        nama_kegiatan,
+        tanggal_berangkat,
+        tanggal_kembali,
+        pegawai:user_id (
+          nip,
+          nama,
+          pangkat,
+          jabatan
+        )
+      `)
       .eq("nomor_spd", id)
       .single();
 
-    if (error || !spd) {
+    if (error || !data) {
       return res.status(404).json({ message: "SPD not found" });
     }
 
-    // Render EJS
+    const spdFormatted = {
+      nomor_spd: data.nomor_spd,
+      nama_kegiatan: data.nama_kegiatan,
+      tanggal_berangkat: formatTanggal(data.tanggal_berangkat),
+      tanggal_kembali: formatTanggal(data.tanggal_kembali),
+
+      nip: data.pegawai?.nip ?? "",
+      nama: data.pegawai?.nama ?? "",
+      pangkat: data.pegawai?.pangkat ?? "",
+      jabatan: data.pegawai?.jabatan ?? "",
+    };
+
     const html = await ejs.renderFile(
       path.join(__dirname, "../views/template.ejs"),
-      {
-        spdFormatted: {
-          ...spd,
-          tanggal_berangkat: formatTanggal(spd.tanggal_berangkat),
-          tanggal_kembali: formatTanggal(spd.tanggal_kembali),
-        },
-      }
+      { spdFormatted }
     );
 
-    // Launch Puppeteer (NORMAL)
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -56,27 +71,16 @@ router.get("/spd/:id", async (req, res) => {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
 
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-    });
-
+    const pdf = await page.pdf({ format: "A4", printBackground: true });
     await browser.close();
 
-    // Open in new tab (NOT download)
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `inline; filename="spd-${id}.pdf"`
-    );
-
+    res.setHeader("Content-Disposition", `inline; filename="spd-${id}.pdf"`);
     res.end(pdf);
+
   } catch (err) {
-    console.error("PDF ERROR FULL:", err);
-    res.status(500).json({
-      message: "Failed to generate PDF",
-      error: err.message,
-    });
+    console.error("PDF ERROR:", err);
+    res.status(500).json({ message: "Failed to generate PDF" });
   }
 });
 
