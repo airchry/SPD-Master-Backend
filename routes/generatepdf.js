@@ -1,6 +1,5 @@
 import path from "path";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import puppeteer from "puppeteer";
 import { Router } from "express";
 import supabase from "../supabase.js";
 import ejs from "ejs";
@@ -36,30 +35,22 @@ router.get("/spd/:id", async (req, res) => {
       return res.status(404).json({ message: "SPD not found" });
     }
 
-    let html;
-    try {
-      html = await ejs.renderFile(
-        path.join(__dirname, "../views/template.ejs"),
-        { spdFormatted: spd }
-      );
-    } catch (e) {
-      console.error("EJS ERROR:", e);
-      return res.status(500).json({ message: "EJS render failed" });
-    }
+    // Render EJS
+    const html = await ejs.renderFile(
+      path.join(__dirname, "../views/template.ejs"),
+      {
+        spdFormatted: {
+          ...spd,
+          tanggal_berangkat: formatTanggal(spd.tanggal_berangkat),
+          tanggal_kembali: formatTanggal(spd.tanggal_kembali),
+        },
+      }
+    );
 
-    const executablePath =
-      (await chromium.executablePath()) || "/usr/bin/chromium-browser";
-
+    // Launch Puppeteer (NORMAL)
     const browser = await puppeteer.launch({
-      args: [
-        ...chromium.args,
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-      executablePath,
       headless: true,
-      ignoreHTTPSErrors: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
@@ -72,25 +63,21 @@ router.get("/spd/:id", async (req, res) => {
 
     await browser.close();
 
+    // Open in new tab (NOT download)
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
       `inline; filename="spd-${id}.pdf"`
     );
 
-
     res.end(pdf);
-
   } catch (err) {
-  console.error("PDF ERROR FULL:", err);
-  res.status(500).json({
-    message: "Failed to generate PDF",
-    error: err.message,
-    stack: err.stack
-  });
-}
-
+    console.error("PDF ERROR FULL:", err);
+    res.status(500).json({
+      message: "Failed to generate PDF",
+      error: err.message,
+    });
+  }
 });
-
 
 export default router;
