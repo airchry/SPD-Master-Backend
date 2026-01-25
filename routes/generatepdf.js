@@ -28,7 +28,18 @@ router.get("/spd/:id", async (req, res) => {
     const { data, error } = await supabase
       .from("spd")
       .select(`
-        *,
+        nomor_spd,
+        nama_kegiatan,
+        tanggal_berangkat,
+        tanggal_kembali,
+        nama_angkutan,
+        tempat_berangkat,
+        tempat_tujuan,
+        lama_perjalanan,
+        nama_ppk,
+        nip_ppk,
+        nama_kepala,
+        nip_kepala,
         pegawai:user_id (
           nip,
           nama,
@@ -46,8 +57,18 @@ router.get("/spd/:id", async (req, res) => {
     const spdFormatted = {
       nomor_spd: data.nomor_spd,
       nama_kegiatan: data.nama_kegiatan,
+      nama_angkutan: data.nama_angkutan,
+      tempat_berangkat: data.tempat_berangkat,
+      tempat_tujuan: data.tempat_tujuan,
+      lama_perjalanan: data.lama_perjalanan,
+
       tanggal_berangkat: formatTanggal(data.tanggal_berangkat),
       tanggal_kembali: formatTanggal(data.tanggal_kembali),
+
+      nama_ppk: data.nama_ppk,
+      nip_ppk: data.nip_ppk,
+      nama_kepala: data.nama_kepala,
+      nip_kepala: data.nip_kepala,
 
       nip: data.pegawai?.nip ?? "",
       nama: data.pegawai?.nama ?? "",
@@ -55,9 +76,15 @@ router.get("/spd/:id", async (req, res) => {
       jabatan: data.pegawai?.jabatan ?? "",
     };
 
+    const today = new Date().toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+
     const html = await ejs.renderFile(
       path.join(__dirname, "../views/template.ejs"),
-      { spdFormatted }
+      { spdFormatted, today }
     );
 
     const browser = await puppeteer.launch({
@@ -68,11 +95,18 @@ router.get("/spd/:id", async (req, res) => {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
 
-    const pdf = await page.pdf({ format: "A4", printBackground: true });
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+
     await browser.close();
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="spd-${id}.pdf"`);
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="spd-${id}.pdf"`
+    );
     res.end(pdf);
 
   } catch (err) {
