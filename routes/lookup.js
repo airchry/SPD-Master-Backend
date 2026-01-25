@@ -134,7 +134,17 @@ router.get("/filterspd", async (req, res) => {
 
     if (error) throw error;
 
-    res.json(data);
+    const flattened = data.map(item => ({
+      nomor_spd: item.nomor_spd,
+      nama_kegiatan: item.nama_kegiatan,
+      tanggal_berangkat: item.tanggal_berangkat,
+      tanggal_kembali: item.tanggal_kembali,
+
+      nama: item.pegawai?.nama ?? "",
+      nip: item.pegawai?.nip ?? ""
+    }));
+
+    res.json(flattened);
   } catch (err) {
     console.error("FILTER SPD ERROR:", err);
     res.status(500).json({ error: err.message });
