@@ -28,10 +28,7 @@ router.get("/spd/:id", async (req, res) => {
     const { data, error } = await supabase
       .from("spd")
       .select(`
-        nomor_spd,
-        nama_kegiatan,
-        tanggal_berangkat,
-        tanggal_kembali,
+        *,
         pegawai:user_id (
           nip,
           nama,
