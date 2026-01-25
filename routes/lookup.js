@@ -127,7 +127,9 @@ router.get("/filterspd", async (req, res) => {
 
     const { data, error } = await supabase
       .from("spd")
-      .select("nomor_spd, nama_kegiatan, tanggal_berangkat, tanggal_kembali")
+      .select(`nomor_spd, nama_kegiatan, tanggal_berangkat, tanggal_kembali,
+        pegawai:user_id (nip, nama)`
+      )
       .eq("user_id", pegawai.id);
 
     if (error) throw error;
