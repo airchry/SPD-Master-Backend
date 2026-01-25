@@ -98,7 +98,15 @@ router.get("/spd/:id", async (req, res) => {
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
+      scale: 0.8,
+      margin: {
+        top: "5mm",
+        right: "0mm",
+        bottom: "0mm",
+        left: "0mm",
+      },
     });
+
 
     await browser.close();
 
